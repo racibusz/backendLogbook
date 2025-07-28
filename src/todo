@@ -1,1 +1,2 @@
-TODO: Reliable database service (typeorm?)
+DONE: Reliable database service (typeorm?)
+TODO: Create a flights database

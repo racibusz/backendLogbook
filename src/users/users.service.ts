@@ -1,23 +1,21 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from '../database/user.entity';
+import { Repository } from 'typeorm';
+import {hashSync, genSaltSync} from 'bcrypt';
+import { RegisterDTO } from '../auth/registerDTO';
 
-
-// TODO: Implement the UsersService with necessary methods and logic
-// This is only for test
 @Injectable()
 export class UsersService {
-    private users = [
-        {
-            id: 1,
-            email: 'john@doe.com',
-            password: 'password123',
-        },
-        {
-            id: 2,
-            email: 'test@test.com',
-            password: 'test123',
-        }
-    ];
+    constructor(
+        @InjectRepository(User)
+        private userRepository: Repository<User>,
+    ) {}
     async findOneByEmail(email: string) {
-        return this.users.find(user => user.email === email);
+        const result = await this.userRepository.findOne({ where: { email: email } });
+        return result;
+    }
+    async registerUser(registerDTO: RegisterDTO){
+        return this.userRepository.save(new User(registerDTO.email, hashSync(registerDTO.password, genSaltSync(10))));
     }
 }

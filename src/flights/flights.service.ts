@@ -8,8 +8,8 @@ import { FlightsPage } from "./flights.page";
 // Adding flights
 // Modifying flights
 // Removing flights
-// Getting flights, with pagination, with flight summary
-// Getting a summary alone
+// Getting flights, with pagination
+// Getting a summary
 
 @Injectable()
 export class FlightsService {
@@ -27,6 +27,4 @@ export class FlightsService {
         })
         return {flights: data, totalPages: total/10, presentPage: (pageNumber? Number(pageNumber): 0)}
     }
-
-    
 }

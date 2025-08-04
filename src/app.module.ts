@@ -8,6 +8,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './database/user.entity';
 import { FlightsModule } from './flights/flights.module';
 import { Flight } from './database/flight.entity';
+import { AirplaneType } from './database/aircraftType.entity';
+import { AirplanesModule } from './airplanes/airplanes.module';
 
 @Module({
   imports: [AuthModule, UsersModule,
@@ -18,10 +20,10 @@ import { Flight } from './database/flight.entity';
       username: 'root',
       password: '', // TODO: Replace it with data took from environment variables
       database: 'logbook_app',
-      entities: [User, Flight],
+      entities: [User, Flight, AirplaneType],
       synchronize: true, // Set to false in production
     }),
-    FlightsModule
+    FlightsModule, AirplanesModule
   ],
   controllers: [AppController],
   providers: [AppService,

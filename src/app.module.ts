@@ -10,6 +10,7 @@ import { FlightsModule } from './flights/flights.module';
 import { Flight } from './database/flight.entity';
 import { AirplaneType } from './database/aircraftType.entity';
 import { AirplanesModule } from './airplanes/airplanes.module';
+import { Airplane } from './database/airplane.entity';
 
 @Module({
   imports: [AuthModule, UsersModule,
@@ -20,7 +21,7 @@ import { AirplanesModule } from './airplanes/airplanes.module';
       username: 'root',
       password: '', // TODO: Replace it with data took from environment variables
       database: 'logbook_app',
-      entities: [User, Flight, AirplaneType],
+      entities: [User, Flight, AirplaneType, Airplane],
       synchronize: true, // Set to false in production
     }),
     FlightsModule, AirplanesModule

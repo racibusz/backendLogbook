@@ -9,9 +9,14 @@ export class AirplanesController {
     constructor(private airplanesService: AirplanesService) {}
 
     @Get('/types/:type')
-    getFlights(@Param('type') type: string){
+    getTypes(@Param('type') type: string){
         const result = this.airplanesService.getTypes(type);
         return(result);
     }
-    
+    @Get('/:registration')
+    getAirplaneByRegistration(@Param('registration') registration: string){
+        const result = this.airplanesService.getAirplanesByRegistration(registration);
+        return result;
+    }
+
 }

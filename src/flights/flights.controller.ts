@@ -10,12 +10,18 @@ import { CreateFlightDTO } from './createFlightDTO';
 export class FlightsController {
     constructor(private flightsService: FlightsService) {}
 
-    @Get()
+    @Get('')
     getFlights(@Request() req) : Promise<FlightsPage>{
         // req.user.sub < - User id
         const result = this.flightsService.getFlights(req.user.sub);
         return(result);
     }
+    @Get("summary")
+    getSummary(@Request() req){
+        return this.flightsService.getSummary(req.user.sub);
+    }
+
+
     @Get(":page")
     getFlightsPaged(@Request() req, @Param("page") page:number) : Promise<FlightsPage>{
         // req.user.sub < - User id
@@ -27,5 +33,6 @@ export class FlightsController {
     addFlight(@Request() req,@Body() flightDTO: CreateFlightDTO){
         return this.flightsService.addFlight(req.user.sub, flightDTO);
     }
+
     
 }

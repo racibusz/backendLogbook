@@ -22,6 +22,11 @@ export class AirplanesService {
         return(this.airplaneTypesRepo.findOne({where: {id: id}}));
     }
 
+    async getAirplanesByRegistration(registration: string){
+        let airplanes = await this.airplaneRepository.find({where: {registration: Like(`%${registration}%`)}, take: 20})
+        return(airplanes)
+    }
+
     async getAirplaneByRegistration(registration: string, aircraftTypeId: number){
         let airplane = await this.airplaneRepository.findOne({where: {registration: registration}});
         if(airplane == null)

@@ -5,6 +5,7 @@ import { Injectable } from "@nestjs/common";
 import { FlightsPage } from "./flights.page";
 import { CreateFlightDTO } from "./createFlightDTO";
 import { AirplanesService } from "../airplanes/airplanes.service";
+import { SummaryDTO } from "./summaryDTO";
 
 //  In this Service:
 // Adding flights
@@ -37,5 +38,10 @@ export class FlightsService {
             userId,
             aircraft: airplane,
         }))
+    }
+    async getSummary(userId: number){
+        // TODO: Implement this thing
+        // Possibly will have to change the system of saving time, to store just the minutes as int
+        return null;
     }
 }

@@ -5,26 +5,20 @@ import { Request } from '@nestjs/common';
 import { FlightsPage } from './flights.page';
 import { Param } from '@nestjs/common';
 import { CreateFlightDTO } from './createFlightDTO';
+import { SummaryDTO } from './summaryDTO';
+import { SummaryResponseDTO } from './SummaryResponse';
 
 @Controller('flights')
 export class FlightsController {
     constructor(private flightsService: FlightsService) {}
+    @Get("summary")
+    async getSummary(@Request() req, @Query('page') page?: number):Promise<SummaryResponseDTO>{
+        const user = await req.user;
+        return this.flightsService.getSummary(user.sub, page);
+    }
 
     @Get('')
-    getFlights(@Request() req) : Promise<FlightsPage>{
-        // req.user.sub < - User id
-        const result = this.flightsService.getFlights(req.user.sub);
-        return(result);
-    }
-    @Get("summary")
-    getSummary(@Request() req){
-        return this.flightsService.getSummary(req.user.sub);
-    }
-
-
-    @Get(":page")
-    getFlightsPaged(@Request() req, @Param("page") page:number) : Promise<FlightsPage>{
-        // req.user.sub < - User id
+    getFlightsPaged(@Request() req, @Query('page') page?: number) : Promise<FlightsPage>{
         const result = this.flightsService.getFlights(req.user.sub, page);
         return(result);
     }

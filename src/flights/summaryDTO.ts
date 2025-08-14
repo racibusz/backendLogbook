@@ -1,5 +1,6 @@
 export interface SummaryDTO{
     total: string,
+    pic: string,
     singlePilotSE: string,
     singlePilotME: string,
     multiPilot: string,
@@ -10,5 +11,4 @@ export interface SummaryDTO{
     coPilot: string,
     dual: string,
     instructor: string,
-    pic: string,
 }

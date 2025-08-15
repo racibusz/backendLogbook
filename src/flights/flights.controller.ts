@@ -18,14 +18,16 @@ export class FlightsController {
     }
 
     @Get('')
-    getFlightsPaged(@Request() req, @Query('page') page?: number) : Promise<FlightsPage>{
-        const result = this.flightsService.getFlights(req.user.sub, page);
+    async getFlightsPaged(@Request() req, @Query('page') page?: number) : Promise<FlightsPage>{
+        const user = await req.user;
+        const result = this.flightsService.getFlights(user.sub, page);
         return(result);
     }
 
     @Post()
-    addFlight(@Request() req,@Body() flightDTO: CreateFlightDTO){
-        return this.flightsService.addFlight(req.user.sub, flightDTO);
+    async addFlight(@Request() req,@Body() flightDTO: CreateFlightDTO){
+        const user = await req.user;
+        return this.flightsService.addFlight(user.sub, flightDTO);
     }
 
     

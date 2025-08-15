@@ -1,5 +1,5 @@
 import { Flight } from "../database/flight.entity";
-import { NumericType, Repository } from "typeorm";
+import { Equal, NumericType, Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { FlightsPage } from "./flights.page";
@@ -23,16 +23,16 @@ export class FlightsService {
         private readonly airplaneService: AirplanesService,
     ) {}
 
-    async getFlights(userId: number, pageNumber: number = 0) : Promise<FlightsPage>{
+    async getFlights(userIdProvided: number, pageNumber: number = 0) : Promise<FlightsPage>{
         if(pageNumber == 0)
-            pageNumber = Math.ceil((await this.flightsRepository.count({where: {userId:userId}})) / 10);
+            pageNumber = Math.ceil((await this.flightsRepository.count({where: {userId:userIdProvided}})) / 10);
         const [data, total] = await this.flightsRepository.findAndCount({
-            where: {userId: userId},
+            where: {userId: Equal(userIdProvided)},
             order: {flightDate: 'ASC'},
             take: 10,
-            skip: 10*(pageNumber-1)
+            skip: 10*(pageNumber-1),
         })
-        return {flights: data, totalPages: Math.ceil(total/10), presentPage: (pageNumber? Number(pageNumber): 0)}
+        return {userId: userIdProvided, flights: data, totalPages: Math.ceil(total/10), presentPage: (pageNumber? Number(pageNumber): 0)}
     }
     async addFlight(userId: number, flightDTO: CreateFlightDTO){
         const airplane = await this.airplaneService.getAirplaneByRegistration(flightDTO.aircraftRegistration, flightDTO.aircraftTypeId);

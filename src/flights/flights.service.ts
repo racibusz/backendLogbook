@@ -53,10 +53,13 @@ export class FlightsService {
             SEC_TO_TIME(SUM(TIME_TO_SEC(STR_TO_DATE(f.flightConditionNightTime, '%H:%i')))) AS night,
             SEC_TO_TIME(SUM(TIME_TO_SEC(STR_TO_DATE(f.copilotTime, '%H:%i')))) AS coPilot,
             SEC_TO_TIME(SUM(TIME_TO_SEC(STR_TO_DATE(f.dualTime, '%H:%i')))) AS \`dual\`,
-            SEC_TO_TIME(SUM(TIME_TO_SEC(STR_TO_DATE(f.instructorTime, '%H:%i')))) AS instructor
+            SEC_TO_TIME(SUM(TIME_TO_SEC(STR_TO_DATE(f.instructorTime, '%H:%i')))) AS instructor,
+            SUM(f.landingsDay) AS landingsDay,
+            SUM(f.landingsNight) AS landingsNight
             `;
-        if(pageNumber == 0)
+        if(pageNumber == 0){
             pageNumber = Math.ceil((await this.flightsRepository.count({where: {userId:userId}})) / 10);
+        }
 
         // Select flights that need to be summarized
         const subQueryTotal = this.flightsRepository.createQueryBuilder("f_sub")
@@ -70,7 +73,7 @@ export class FlightsService {
         const subQueryThis = this.flightsRepository.createQueryBuilder("f_sub")
             .where("f_sub.userId = :userId", { userId })
             .orderBy("f_sub.flightDate", "ASC")
-            .skip(10*(pageNumber-1))
+            .skip(10*(pageNumber - 1))
             .take(10);
 
         const totalSummary = await this.flightsRepository.createQueryBuilder("f")

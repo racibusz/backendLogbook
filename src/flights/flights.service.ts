@@ -28,7 +28,7 @@ export class FlightsService {
             pageNumber = Math.ceil((await this.flightsRepository.count({where: {userId:userIdProvided}})) / 10);
         const [data, total] = await this.flightsRepository.findAndCount({
             where: {userId: Equal(userIdProvided)},
-            order: {flightDate: 'ASC'},
+            order: {flightDate: 'ASC', departureTime: 'ASC'},
             take: 10,
             skip: 10*(pageNumber-1),
         })
@@ -103,6 +103,29 @@ export class FlightsService {
             totalSummary: totalSummary,
             thisPageSummary: thisPageSummary,
             previousPagesSummary: previousPagesSummary,
+        });
+    }
+    async removeFlight(userId: number, flightId: number){
+        const flight = await this.flightsRepository.findOne({
+            where: {id: Equal(flightId), userId: Equal(userId)},
+        });
+        if(!flight){
+            throw new NotFoundException("Flight not found");
+        }
+        return this.flightsRepository.remove(flight);
+    }
+    async modifyFlight(userId:number, flightId: number, flightDTO: CreateFlightDTO){
+        const flight = await this.flightsRepository.findOne({
+            where: {id: Equal(flightId), userId: Equal(userId)},
+        });
+        if(!flight){
+            throw new NotFoundException("Flight not found");
+        }
+        const airplane = await this.airplaneService.getAirplaneByRegistration(flightDTO.aircraftRegistration, flightDTO.aircraftTypeId);
+        return this.flightsRepository.save({
+            ...flight,
+            ...flightDTO,
+            aircraft: airplane,
         });
     }
 }

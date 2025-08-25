@@ -29,6 +29,14 @@ export class FlightsController {
         const user = await req.user;
         return this.flightsService.addFlight(user.sub, flightDTO);
     }
-
-    
+    @Post('remove')
+    async removeFlight(@Request() req, @Body() flightId: { id: number }) {
+        const user = await req.user;
+        return this.flightsService.removeFlight(user.sub, flightId.id);
+    }
+    @Post('modify')
+    async modifyFlight(@Request() req, @Body() body: { flightDTO: CreateFlightDTO, flightId: number }) {
+        const user = await req.user;
+        return this.flightsService.modifyFlight(user.sub, body.flightId, body.flightDTO);
+    }
 }

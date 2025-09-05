@@ -16,7 +16,6 @@ export class FlightsController {
         const user = await req.user;
         return this.flightsService.getSummary(user.sub, page);
     }
-
     @Get('')
     async getFlightsPaged(@Request() req, @Query('page') page?: number) : Promise<FlightsPage>{
         const user = await req.user;

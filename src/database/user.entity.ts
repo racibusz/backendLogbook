@@ -8,6 +8,18 @@ export class User {
     email: string;
     @Column()
     password: string;
+    @Column()
+    firstName: string;
+    @Column()
+    lastName: string;
+    @Column()
+    image: string;
+    @Column()
+    address1: string;
+    @Column()
+    address2:string;
+    @Column()
+    address3:string;
     constructor(email: string, password_hash: string){
         this.email = email;
         this.password = password_hash;

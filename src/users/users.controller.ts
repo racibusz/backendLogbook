@@ -25,6 +25,8 @@ export class UsersController {
         const result = await this.usersService.modifyUser(user.sub, newUser)
         if(result == null)
             throw new NotFoundException("User not found")
-        return result;
+        return plainToInstance(userDTO, result, {
+            excludeExtraneousValues: true,
+        });
     }
 }

@@ -22,6 +22,20 @@ export class FlightsService {
         private flightsRepository: Repository<Flight>,
         private readonly airplaneService: AirplanesService,
     ) {}
+    summarizingQuery = `
+    SEC_TO_TIME(SUM(TIME_TO_SEC(STR_TO_DATE(f.totalTime, '%H:%i')))) AS total,
+    SEC_TO_TIME(SUM(TIME_TO_SEC(STR_TO_DATE(f.picTime, '%H:%i')))) AS pic,
+    SEC_TO_TIME(SUM(TIME_TO_SEC(STR_TO_DATE(f.singlePilotSeTime, '%H:%i')))) AS singlePilotSE,
+    SEC_TO_TIME(SUM(TIME_TO_SEC(STR_TO_DATE(f.singlePilotMeTime, '%H:%i')))) AS singlePilotME,
+    SEC_TO_TIME(SUM(TIME_TO_SEC(STR_TO_DATE(f.multiPilotTime, '%H:%i')))) AS multiPilot,
+    SEC_TO_TIME(SUM(TIME_TO_SEC(STR_TO_DATE(f.flightConditionIfrTime, '%H:%i')))) AS ifr,
+    SEC_TO_TIME(SUM(TIME_TO_SEC(STR_TO_DATE(f.flightConditionNightTime, '%H:%i')))) AS night,
+    SEC_TO_TIME(SUM(TIME_TO_SEC(STR_TO_DATE(f.copilotTime, '%H:%i')))) AS coPilot,
+    SEC_TO_TIME(SUM(TIME_TO_SEC(STR_TO_DATE(f.dualTime, '%H:%i')))) AS \`dual\`,
+    SEC_TO_TIME(SUM(TIME_TO_SEC(STR_TO_DATE(f.instructorTime, '%H:%i')))) AS instructor,
+    SUM(f.landingsDay) AS landingsDay,
+    SUM(f.landingsNight) AS landingsNight
+    `;
 
     async getFlights(userIdProvided: number, pageNumber: number = 0) : Promise<FlightsPage>{
         if(pageNumber == 0)
@@ -43,20 +57,6 @@ export class FlightsService {
         }))
     }
     async getSummary(userId: number, pageNumber: number = 0):Promise<SummaryResponseDTO>{
-        const summarizingQuery = `
-            SEC_TO_TIME(SUM(TIME_TO_SEC(STR_TO_DATE(f.totalTime, '%H:%i')))) AS total,
-            SEC_TO_TIME(SUM(TIME_TO_SEC(STR_TO_DATE(f.picTime, '%H:%i')))) AS pic,
-            SEC_TO_TIME(SUM(TIME_TO_SEC(STR_TO_DATE(f.singlePilotSeTime, '%H:%i')))) AS singlePilotSE,
-            SEC_TO_TIME(SUM(TIME_TO_SEC(STR_TO_DATE(f.singlePilotMeTime, '%H:%i')))) AS singlePilotME,
-            SEC_TO_TIME(SUM(TIME_TO_SEC(STR_TO_DATE(f.multiPilotTime, '%H:%i')))) AS multiPilot,
-            SEC_TO_TIME(SUM(TIME_TO_SEC(STR_TO_DATE(f.flightConditionIfrTime, '%H:%i')))) AS ifr,
-            SEC_TO_TIME(SUM(TIME_TO_SEC(STR_TO_DATE(f.flightConditionNightTime, '%H:%i')))) AS night,
-            SEC_TO_TIME(SUM(TIME_TO_SEC(STR_TO_DATE(f.copilotTime, '%H:%i')))) AS coPilot,
-            SEC_TO_TIME(SUM(TIME_TO_SEC(STR_TO_DATE(f.dualTime, '%H:%i')))) AS \`dual\`,
-            SEC_TO_TIME(SUM(TIME_TO_SEC(STR_TO_DATE(f.instructorTime, '%H:%i')))) AS instructor,
-            SUM(f.landingsDay) AS landingsDay,
-            SUM(f.landingsNight) AS landingsNight
-            `;
         if(pageNumber == 0){
             pageNumber = Math.ceil((await this.flightsRepository.count({where: {userId:userId}})) / 10);
         }
@@ -77,20 +77,20 @@ export class FlightsService {
             .take(10);
 
         const totalSummary = await this.flightsRepository.createQueryBuilder("f")
-            .select(summarizingQuery)
+            .select(this.summarizingQuery)
             .from('('+subQueryTotal.getQuery()+')', 'f')
             .where('f_sub_id=f.id')
             .setParameters(subQueryTotal.getParameters())
             .getRawOne<SummaryDTO>();
         
         const thisPageSummary = await this.flightsRepository.createQueryBuilder("f")
-            .select(summarizingQuery)
+            .select(this.summarizingQuery)
             .from('('+subQueryThis.getQuery()+')', 'f')
             .where('f_sub_id=f.id')
             .setParameters(subQueryThis.getParameters())
             .getRawOne<SummaryDTO>();
         const previousPagesSummary = await this.flightsRepository.createQueryBuilder("f")
-            .select(summarizingQuery)
+            .select(this.summarizingQuery)
             .from('('+subQueryPrevious.getQuery()+')', 'f')
             .where('f_sub_id=f.id')
             .setParameters(subQueryPrevious.getParameters())
@@ -127,5 +127,21 @@ export class FlightsService {
             ...flightDTO,
             aircraft: airplane,
         });
+    }
+    async getSummaryBetween(userId: number, startDate: Date, endDate: Date):Promise<SummaryDTO>{
+        const subQueryBetween = this.flightsRepository.createQueryBuilder("f_sub")
+            .where("f_sub.userId = :userId", { userId })
+            .andWhere("f_sub.flightDate > :startDate", { startDate })
+            .andWhere("f_sub.flightDate < :endDate", { endDate })
+            .orderBy("f_sub.flightDate", "ASC");
+
+        const summaryBetween = await this.flightsRepository.createQueryBuilder("f")
+            .select(this.summarizingQuery)
+            .from("(" + subQueryBetween.getQuery() + ")", "f")
+            .setParameters(subQueryBetween.getParameters())
+            .getRawOne<SummaryDTO>();
+        if(summaryBetween == undefined)
+            throw NotFoundException
+        return summaryBetween;
     }
 }

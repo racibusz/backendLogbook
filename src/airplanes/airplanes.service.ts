@@ -14,6 +14,18 @@ export class AirplanesService {
         private airplaneRepository: Repository<Airplane>
     ) {}
 
+    async getAirplanesByAssignedUser(userId: number){
+        // let airplanes = await this.airplaneRepository.find({where: {registration: Like(`%${registration}%`)}, take: 20})
+        const airplanes = await this.airplaneRepository
+        .createQueryBuilder("airplane")
+        .innerJoin("airplane.flights", "flight")
+        .leftJoinAndSelect("airplane.aircraftType", "aircraftType")
+        .where("flight.userId = :userId", { userId })
+        .distinct(true)
+        .getMany();
+        return airplanes;
+    }
+
     getTypes(type: string){
         return(this.airplaneTypesRepo.find({where: [{model: Like(`%${type}%`)}, {type: Like(`%${type}%`)}], take: 20} ));
     }

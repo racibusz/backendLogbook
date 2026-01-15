@@ -12,6 +12,9 @@ export class AuthService {
 
     async singIn(email: string, pass: string): Promise<{ accessToken: string }> {
         const user = await this.usersService.findOneByEmail(email);
+        if(user==null){
+            throw new UnauthorizedException();
+        }
         const passwordValid = await compare(pass, user?.password);
         if (user==null || !passwordValid) {
             throw new UnauthorizedException();

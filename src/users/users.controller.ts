@@ -17,7 +17,6 @@ export class UsersController {
         return plainToInstance(userDTO, resultUser, {
             excludeExtraneousValues: true,
         });
-
     }
     @Post()
     async updateUser(@Request() req, @Body() newUser: userDTO): Promise<userDTO>{

@@ -40,6 +40,9 @@ export class FlightsService {
     async getFlights(userIdProvided: number, pageNumber: number = 0) : Promise<FlightsPage>{
         if(pageNumber == 0)
             pageNumber = Math.ceil((await this.flightsRepository.count({where: {userId:userIdProvided}})) / 10);
+        if(pageNumber <= 0){
+            return {userId: userIdProvided, flights: [], totalPages: 0, presentPage: 0};
+        }
         const [data, total] = await this.flightsRepository.findAndCount({
             where: {userId: Equal(userIdProvided)},
             order: {flightDate: 'ASC', departureTime: 'ASC'},

@@ -22,6 +22,9 @@ export class UsersService {
         return result;
     }
     async registerUser(registerDTO: RegisterDTO){
+        if(await this.findOneByEmail(registerDTO.email)){
+            throw new NotFoundException("User already exists");
+        }
         return this.userRepository.save(new User(registerDTO.email, hashSync(registerDTO.password, genSaltSync(10))));
     }
     async modifyUser(id:number, newUser: userDTO){

@@ -4,6 +4,9 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Injectable } from "@nestjs/common";
 import { AirplaneType } from "../database/aircraftType.entity";
 import { Airplane } from "../database/airplane.entity";
+import { CreateFlightDTO } from "../flights/createFlightDTO";
+import { plainToInstance } from "class-transformer";
+import { AirplaneDTO } from "./airplaneDTO";
 
 @Injectable()
 export class AirplanesService {
@@ -14,16 +17,28 @@ export class AirplanesService {
         private airplaneRepository: Repository<Airplane>
     ) {}
 
+    async modifyAirplane(userId: number, newFlight: Airplane){
+        const airplane = await this.airplaneRepository.findOne({where: {id: newFlight.id}})
+        return plainToInstance(AirplaneDTO, airplane, {
+            excludeExtraneousValues: true
+        })
+    }
+
     async getAirplanesByAssignedUser(userId: number){
         // let airplanes = await this.airplaneRepository.find({where: {registration: Like(`%${registration}%`)}, take: 20})
         const airplanes = await this.airplaneRepository
         .createQueryBuilder("airplane")
         .innerJoin("airplane.flights", "flight")
         .leftJoinAndSelect("airplane.aircraftType", "aircraftType")
+        .leftJoinAndSelect("airplane.flights", "flights")
+        .leftJoinAndSelect("airplane.owner", "owner")
         .where("flight.userId = :userId", { userId })
         .distinct(true)
         .getMany();
-        return airplanes;
+
+        return(plainToInstance(AirplaneDTO, airplanes, {
+            excludeExtraneousValues: true,
+        }));
     }
 
     getTypes(type: string){

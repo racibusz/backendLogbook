@@ -1,5 +1,5 @@
 import { Expose } from "class-transformer";
-import { Column, Entity, Generated, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, Generated, OneToMany, PrimaryGeneratedColumn, Unique } from "typeorm";
 
 @Entity()
 export class AirplaneType {

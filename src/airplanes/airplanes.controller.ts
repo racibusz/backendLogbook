@@ -1,8 +1,9 @@
-import { Controller, Query } from '@nestjs/common';
+import { Controller, Post, Query } from '@nestjs/common';
 import { Get } from '@nestjs/common';
-import { Request } from '@nestjs/common';
+import { Request, Body } from '@nestjs/common';
 import { Param } from '@nestjs/common';
 import { AirplanesService } from './airplanes.service';
+import { AirplaneDTO } from './airplaneDTO';
 
 @Controller('airplanes')
 export class AirplanesController {
@@ -24,4 +25,9 @@ export class AirplanesController {
         return result;
     }
 
+    @Post('/modify')
+    async modifyAirplane(@Request() req, @Body() newAirplane : AirplaneDTO){
+        const user = await req.user;
+        const result = this.airplanesService.modifyAirplane(user.sub, newAirplane)
+    }
 }

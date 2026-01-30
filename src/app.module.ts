@@ -14,6 +14,8 @@ import { Airplane } from './database/airplane.entity';
 import { Endorsement } from './database/endorsement.entity';
 import { License } from './database/license.entity';
 import { LicenseModule } from './licenses/licenses.module';
+import { AirportEntity } from './database/airport.entity';
+import {AirportsModule} from './airports/airports.module';
 
 @Module({
   imports: [AuthModule, UsersModule,
@@ -24,10 +26,10 @@ import { LicenseModule } from './licenses/licenses.module';
       username: 'root',
       password: '', // TODO: Replace it with data took from environment variables
       database: 'logbook_app',
-      entities: [User, Flight, AirplaneType, Airplane, Endorsement, License],
+      entities: [User, Flight, AirplaneType, Airplane, Endorsement, License, AirportEntity],
       synchronize: true, // Set to false in production
     }),
-    FlightsModule, AirplanesModule, LicenseModule
+    FlightsModule, AirplanesModule, LicenseModule, AirportsModule,
   ],
   controllers: [AppController],
   providers: [AppService,

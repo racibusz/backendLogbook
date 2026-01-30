@@ -7,6 +7,9 @@ import { CreateFlightDTO } from "./createFlightDTO";
 import { AirplanesService } from "../airplanes/airplanes.service";
 import { SummaryDTO } from "./summaryDTO";
 import { SummaryResponseDTO } from "./SummaryResponse";
+import { plainToInstance } from "class-transformer";
+import { FlightDTO } from "./flightDTO";
+import { AirportsService } from "../airports/airports.service";
 
 //  In this Service:
 // Adding flights
@@ -21,6 +24,7 @@ export class FlightsService {
         @InjectRepository(Flight)
         private flightsRepository: Repository<Flight>,
         private readonly airplaneService: AirplanesService,
+        private readonly airportsService: AirportsService,
     ) {}
     summarizingQuery = `
     SEC_TO_TIME(SUM(TIME_TO_SEC(STR_TO_DATE(f.totalTime, '%H:%i')))) AS total,
@@ -45,16 +49,26 @@ export class FlightsService {
         }
         const [data, total] = await this.flightsRepository.findAndCount({
             where: {userId: Equal(userIdProvided)},
-            order: {flightDate: 'ASC', departureTime: 'ASC'},
+            order: {flightDate: 'DESC', departureTime: 'DESC'},
             take: 10,
             skip: 10*(pageNumber-1),
         })
-        return {userId: userIdProvided, flights: data, totalPages: Math.ceil(total/10), presentPage: (pageNumber? Number(pageNumber): 0)}
+        const convertedData = plainToInstance(Flight, data, {
+            excludeExtraneousValues: true,
+        });
+        for(const flight of convertedData){
+            flight.canEdit = true;
+        }
+        return {userId: userIdProvided, flights: convertedData, totalPages: Math.ceil(total/10), presentPage: (pageNumber? Number(pageNumber): 0)}
     }
     async addFlight(userId: number, flightDTO: CreateFlightDTO){
-        const airplane = await this.airplaneService.getAirplaneByRegistration(flightDTO.aircraftRegistration, flightDTO.aircraftTypeId);
+        const airplane = await this.airplaneService.getAirplaneByRegistration(userId,flightDTO.aircraftRegistration, flightDTO.aircraftTypeId);
+        const departureAerodrome = await this.airportsService.getAirportByIcao(flightDTO.departureAerodrome);
+        const arrivalAerodrome = await this.airportsService.getAirportByIcao(flightDTO.arrivalAerodrome);   
         return(this.flightsRepository.save({
             ...flightDTO,
+            departureAerodrome: departureAerodrome,
+            arrivalAerodrome: arrivalAerodrome,
             userId: userId,
             aircraft: airplane,
         }))
@@ -124,10 +138,14 @@ export class FlightsService {
         if(!flight){
             throw new NotFoundException("Flight not found");
         }
-        const airplane = await this.airplaneService.getAirplaneByRegistration(flightDTO.aircraftRegistration, flightDTO.aircraftTypeId);
+        const airplane = await this.airplaneService.getAirplaneByRegistration(userId, flightDTO.aircraftRegistration, flightDTO.aircraftTypeId);
+        const departureAerodrome = await this.airportsService.getAirportByIcao(flightDTO.departureAerodrome);
+        const arrivalAerodrome = await this.airportsService.getAirportByIcao(flightDTO.arrivalAerodrome);   
         return this.flightsRepository.save({
             ...flight,
             ...flightDTO,
+            departureAerodrome: departureAerodrome,
+            arrivalAerodrome: arrivalAerodrome,
             aircraft: airplane,
         });
     }

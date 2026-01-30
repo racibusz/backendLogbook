@@ -4,8 +4,9 @@ import { Flight } from '../database/flight.entity';
 import { FlightsController } from './flights.controller';
 import { FlightsService } from './flights.service';
 import { AirplanesModule } from '../airplanes/airplanes.module';
+import { AirportsModule } from '../airports/airports.module';
 @Module({
-    imports: [TypeOrmModule.forFeature([Flight]), AirplanesModule],
+    imports: [TypeOrmModule.forFeature([Flight]), AirplanesModule, AirportsModule],
     controllers: [FlightsController],
     providers: [FlightsService],
     exports: [FlightsService]

@@ -13,9 +13,12 @@ export class AirplaneDTO {
     @Type(()=>AirplaneType)
     aircraftType: AirplaneType;
 
-    @Expose()
+    // @Expose()
     @Type(()=>Flight)
     flights: Flight[];
+
+    @Expose()
+    pricePerHour: number;
 
     @Expose()
     registration: string;
@@ -23,4 +26,7 @@ export class AirplaneDTO {
     @Expose()
     @Type(()=>userDTO)
     owner: userDTO;
+
+    @Expose()
+    canEdit?:boolean;
 }

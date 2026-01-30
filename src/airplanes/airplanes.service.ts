@@ -7,6 +7,7 @@ import { Airplane } from "../database/airplane.entity";
 import { CreateFlightDTO } from "../flights/createFlightDTO";
 import { plainToInstance } from "class-transformer";
 import { AirplaneDTO } from "./airplaneDTO";
+import { UnauthorizedException } from "@nestjs/common";
 
 @Injectable()
 export class AirplanesService {
@@ -17,9 +18,12 @@ export class AirplanesService {
         private airplaneRepository: Repository<Airplane>
     ) {}
 
-    async modifyAirplane(userId: number, newFlight: Airplane){
-        const airplane = await this.airplaneRepository.findOne({where: {id: newFlight.id}})
-        return plainToInstance(AirplaneDTO, airplane, {
+    async modifyAirplane(userId: number, newAirplane: AirplaneDTO){
+        let airplane = await this.airplaneRepository.findOne({where: {id: newAirplane.id}})
+        if(userId!=airplane?.owner.id)
+            throw new UnauthorizedException();
+        airplane = await this.airplaneRepository.save({...newAirplane, aircraftType: {id: newAirplane.aircraftType.id}});
+        return plainToInstance(Airplane, airplane, {
             excludeExtraneousValues: true
         })
     }
@@ -30,15 +34,22 @@ export class AirplanesService {
         .createQueryBuilder("airplane")
         .innerJoin("airplane.flights", "flight")
         .leftJoinAndSelect("airplane.aircraftType", "aircraftType")
-        .leftJoinAndSelect("airplane.flights", "flights")
+        // .leftJoinAndSelect("airplane.flights", "flights")
         .leftJoinAndSelect("airplane.owner", "owner")
         .where("flight.userId = :userId", { userId })
         .distinct(true)
         .getMany();
 
-        return(plainToInstance(AirplaneDTO, airplanes, {
+        airplanes.forEach((airplane)=>{
+            if(airplane.owner.id == userId){
+                airplane.canEdit = true;
+            }
+        })
+
+        const result = (plainToInstance(AirplaneDTO, airplanes, {
             excludeExtraneousValues: true,
         }));
+        return result;
     }
 
     getTypes(type: string){
@@ -54,10 +65,10 @@ export class AirplanesService {
         return(airplanes)
     }
 
-    async getAirplaneByRegistration(registration: string, aircraftTypeId: number){
+    async getAirplaneByRegistration(userId:number, registration: string, aircraftTypeId: number){
         let airplane = await this.airplaneRepository.findOne({where: {registration: registration}});
         if(airplane == null)
-            airplane = await this.airplaneRepository.save({registration: registration, aircraftType: {id: aircraftTypeId}});
+            airplane = await this.airplaneRepository.save({registration: registration, owner: {id: userId}, aircraftType: {id: aircraftTypeId}});
         return airplane;
     }
 

@@ -34,8 +34,8 @@ export class FlightsController {
         return this.flightsService.removeFlight(user.sub, flightId.id);
     }
     @Post('modify')
-    async modifyFlight(@Request() req, @Body() body: { flightDTO: CreateFlightDTO, flightId: number }) {
+    async modifyFlight(@Request() req, @Body() body: { flight: CreateFlightDTO, flightId: number }) {
         const user = await req.user;
-        return this.flightsService.modifyFlight(user.sub, body.flightId, body.flightDTO);
+        return this.flightsService.modifyFlight(user.sub, body.flightId, body.flight);
     }
 }

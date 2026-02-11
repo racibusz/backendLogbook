@@ -12,6 +12,10 @@ export class AirportsController {
     async getAirports(){
         return await this.airportsService.getAirports();
     }
+    @Get(':icao')
+    async getAirportByIcao(@Param('icao') icao:string){
+        return await this.airportsService.getAirportByIcao(icao);
+    }
     @Post()
     async saveAirport(@Body() airportToSave: AirportEntity){
         console.log("SAVING AIRPORT INVOKED");

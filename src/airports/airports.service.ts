@@ -10,7 +10,6 @@ export class AirportsService {
         @InjectRepository(AirportEntity)
         private airportRepository: Repository<AirportEntity>,
     ) {}
-
     async saveAirport(airportToSave: AirportEntity) {
         console.log("XDs");
         return await this.airportRepository.save(airportToSave);
@@ -22,7 +21,8 @@ export class AirportsService {
         let airport = await this.airportRepository.findOne({where: {icaoCode: icaoCode}})
         if(airport == null){
             console.log("Creating airport");
-            airport = await this.airportRepository.save({name: "", elevation: 0, icaoCode: icaoCode, latitute: 0, longtitute: 0})
+            return new AirportEntity;
+            // airport = await this.airportRepository.save({name: "", elevation: 0, icaoCode: icaoCode, latitute: 0, longtitute: 0})
         }
         return airport;
     }

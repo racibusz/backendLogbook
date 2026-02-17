@@ -68,7 +68,7 @@ export class AirplanesService {
     async getAirplaneByRegistration(userId:number, registration: string, aircraftTypeId: number){
         let airplane = await this.airplaneRepository.findOne({where: {registration: registration}});
         if(airplane == null)
-            airplane = await this.airplaneRepository.save({registration: registration, owner: {id: userId}, aircraftType: {id: aircraftTypeId}});
+            airplane = await this.airplaneRepository.save({registration: registration.toUpperCase(), owner: {id: userId}, aircraftType: {id: aircraftTypeId}});
         return airplane;
     }
 

@@ -3,6 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { AirplanesService } from "../airplanes/airplanes.service";
 import { AirportEntity } from "../database/airport.entity";
+import { userDTO } from "../users/userDTO";
 
 @Injectable()
 export class AirportsService {
@@ -17,12 +18,13 @@ export class AirportsService {
     async getAirports(){
         return await this.airportRepository.findAndCount();
     }
-    async getAirportByIcao(icaoCode: string): Promise<AirportEntity>{
+    async getAirportByIcao(icaoCode: string, userId:number): Promise<AirportEntity>{
         let airport = await this.airportRepository.findOne({where: {icaoCode: icaoCode}})
         if(airport == null){
-            console.log("Creating airport");
-            return new AirportEntity;
-            // airport = await this.airportRepository.save({name: "", elevation: 0, icaoCode: icaoCode, latitute: 0, longtitute: 0})
+            if(userId)
+                airport = await this.airportRepository.save({name: "CUSTOM", elevation: 0, userThatAdded:{id: userId} ,icaoCode: icaoCode, latitute: 0, longtitute: 0})
+            else
+                airport = new AirportEntity;
         }
         return airport;
     }

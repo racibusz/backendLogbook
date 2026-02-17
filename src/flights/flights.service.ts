@@ -63,8 +63,8 @@ export class FlightsService {
     }
     async addFlight(userId: number, flightDTO: CreateFlightDTO){
         const airplane = await this.airplaneService.getAirplaneByRegistration(userId,flightDTO.aircraftRegistration, flightDTO.aircraftTypeId);
-        const departureAerodrome = await this.airportsService.getAirportByIcao(flightDTO.departureAerodrome);
-        const arrivalAerodrome = await this.airportsService.getAirportByIcao(flightDTO.arrivalAerodrome);   
+        const departureAerodrome = await this.airportsService.getAirportByIcao(flightDTO.departureAerodrome, userId);
+        const arrivalAerodrome = await this.airportsService.getAirportByIcao(flightDTO.arrivalAerodrome, userId);   
         return(this.flightsRepository.save({
             ...flightDTO,
             departureAerodrome: departureAerodrome,
@@ -139,8 +139,8 @@ export class FlightsService {
             throw new NotFoundException("Flight not found");
         }
         const airplane = await this.airplaneService.getAirplaneByRegistration(userId, flightDTO.aircraftRegistration, flightDTO.aircraftTypeId);
-        const departureAerodrome = await this.airportsService.getAirportByIcao(flightDTO.departureAerodrome);
-        const arrivalAerodrome = await this.airportsService.getAirportByIcao(flightDTO.arrivalAerodrome);   
+        const departureAerodrome = await this.airportsService.getAirportByIcao(flightDTO.departureAerodrome, userId);
+        const arrivalAerodrome = await this.airportsService.getAirportByIcao(flightDTO.arrivalAerodrome, userId);   
         return this.flightsRepository.save({
             ...flight,
             ...flightDTO,

@@ -14,7 +14,7 @@ export class AirportsController {
     }
     @Get(':icao')
     async getAirportByIcao(@Param('icao') icao:string){
-        return await this.airportsService.getAirportByIcao(icao);
+        return await this.airportsService.getAirportByIcao(icao, 0);
     }
     @Post()
     async saveAirport(@Body() airportToSave: AirportEntity){
